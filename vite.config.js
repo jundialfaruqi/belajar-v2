@@ -10,4 +10,7 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+    css: {
+        devSourcemap: false, // ⬅️ ini yang mematikan source map CSS
+    },
 });
