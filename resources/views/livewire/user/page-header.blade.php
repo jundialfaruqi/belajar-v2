@@ -1,15 +1,18 @@
-<div class="page-header d-print-none"> {{-- Page Header --}}
+{{-- Page Header --}}
+<div class="page-header d-print-none">
     <div class="container-xl">
         <div class="row g-2 align-items-center">
             <div class="col">
-                <div class="page-pretitle"> {{-- Page pre-title --}}
+                {{-- Page pre-title --}}
+                <div class="page-pretitle">
                     Overview
                 </div>
                 <h2 class="page-title">
-                    Dashboard
+                    {{ $title }}
                 </h2>
             </div>
-            <div class="col-auto ms-auto d-print-none"> {{-- Page title actions --}}
+            {{-- Page title actions --}}
+            <div class="col-auto ms-auto d-print-none">
                 <div class="btn-list">
                     <span class="d-none d-sm-inline">
                         <a href="#" class="btn">
@@ -25,7 +28,7 @@
                             <path d="M12 5l0 14" />
                             <path d="M5 12l14 0" />
                         </svg>
-                        Create new report
+                        Tambah User
                     </a>
                     <a href="#" class="btn btn-primary d-sm-none btn-icon" data-bs-toggle="modal"
                         data-bs-target="#modal-report" aria-label="Create new report">
