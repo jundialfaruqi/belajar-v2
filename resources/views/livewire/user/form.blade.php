@@ -1,40 +1,38 @@
 @if ($showForm)
+    <h3 class="card-title d-flex align-items-center gap-2">
+        {{ $isEdit ? 'Edit Data User' : 'Buat Akun User Baru' }}
+    </h3>
     <div class="card">
-        <div class="card-header">
-            <h3 class="card-title"> {{ $isEdit ? 'Edit Data User' : 'Buat Akun User Baru' }}</h3>
-            <div class="card-options"></div>
-        </div>
-        <div class="card-body">
-            <form wire:submit.prevent="{{ $isEdit ? 'update' : 'store' }}">
-                <div class="mb-2">
-                    <label>Nama</label>
+        <form wire:submit.prevent="{{ $isEdit ? 'update' : 'store' }}">
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="mb-1">Nama</label>
                     <input type="text" class="form-control" wire:model="name">
                     @error('name')
                         <small class="text-danger">{{ $message }}</small>
                     @enderror
                 </div>
-
-                <div class="mb-2">
-                    <label>Email</label>
+                <div class="mb-3">
+                    <label class="mb-1">Email</label>
                     <input type="email" class="form-control" wire:model="email">
                     @error('email')
                         <small class="text-danger">{{ $message }}</small>
                     @enderror
                 </div>
-
-                <div class="mb-3">
-                    <label>Password {{ $isEdit ? '(biarkan kosong jika tidak diubah)' : '' }}</label>
+                <div>
+                    <label class="mb-1">Password {{ $isEdit ? '(biarkan kosong jika tidak diubah)' : '' }}</label>
                     <input type="password" class="form-control" wire:model="password">
                     @error('password')
                         <small class="text-danger">{{ $message }}</small>
                     @enderror
                 </div>
-
-                <button type="submit" class="btn btn-primary">
+            </div>
+            <div class="card-footer">
+                <button type="submit" class="btn btn-primary me-2">
                     {{ $isEdit ? 'Update' : 'Simpan' }}
                 </button>
                 <button type="button" class="btn btn-secondary" wire:click="cancelOrResetInput">Cancel</button>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
 @endif

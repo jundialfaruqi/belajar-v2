@@ -3,8 +3,8 @@
 namespace App\Livewire\User;
 
 use App\Models\User;
-use Illuminate\Support\Facades\Crypt; // Tambahkan ini
 use Illuminate\Support\Facades\Hash;
+use Vinkla\Hashids\Facades\Hashids;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -29,28 +29,6 @@ class UserIndex extends Component
     #[Url(as: 'edit')]
     public $editId = null;
 
-    public function mount()
-    {
-        if ($this->editId) {
-            try {
-                $decryptedId = Crypt::decrypt($this->editId);
-                $this->edit($decryptedId);
-            } catch (\Exception $e) {
-                // Handle invalid encrypted ID, misalnya redirect atau error
-                session()->flash('error', 'ID tidak valid.');
-                $this->cancelOrResetInput();
-            }
-        }
-    }
-
-    public function render()
-    {
-        $users = User::select('id', 'name', 'email')->paginate(10);
-        return view('livewire.user.user-index', [
-            'users' => $users,
-        ]);
-    }
-
     protected $rules = [
         'name' => 'required|min:3',
         'email' => 'required|email|unique:users,email',
@@ -67,10 +45,68 @@ class UserIndex extends Component
         'password.min' => 'Password minimal 6 karakter.',
     ];
 
-    public function create()
+    public function mount()
     {
+        if ($this->editId) {
+            try {
+                $decryptedId = Hashids::decode($this->editId)[0] ?? null;
+                if (!$decryptedId) {
+                    throw new \Exception('ID tidak valid.');
+                }
+                $this->edit($decryptedId);
+            } catch (\Exception $e) {
+                session()->flash('error', 'ID tidak valid.');
+                $this->cancelOrResetInput();
+            }
+        }
+    }
+
+    public function edit($id)
+    {
+        $user = User::findOrFail($id);
+
+        $this->name = $user->name;
+        $this->email = $user->email;
+        $this->password = '';
+        $this->isEdit = true;
         $this->showForm = true;
         $this->showTable = false;
+
+        $this->editId = Hashids::encode($id);
+    }
+
+    public function update()
+    {
+        $decryptedId = Hashids::decode($this->editId)[0] ?? null;
+        if (!$decryptedId) {
+            session()->flash('error', 'ID tidak valid.');
+            return $this->cancelOrResetInput();
+        }
+
+        $this->validate([
+            'name' => 'required|min:3',
+            'email' => 'required|email|unique:users,email,' . $decryptedId,
+            'password' => 'nullable|min:6',
+        ]);
+
+        $user = User::findOrFail($decryptedId);
+
+        $user->update([
+            'name' => $this->name,
+            'email' => $this->email,
+            'password' => $this->password ? Hash::make($this->password) : $user->password,
+        ]);
+
+        session()->flash('success', 'User berhasil diupdate');
+        $this->cancelOrResetInput();
+    }
+
+    public function create()
+    {
+        $this->reset(['name', 'email', 'password', 'isEdit', 'showForm', 'editId']);
+        $this->showForm = true;
+        $this->showTable = false;
+        $this->isEdit = false;
     }
 
     public function cancelOrResetInput()
@@ -96,45 +132,17 @@ class UserIndex extends Component
         $this->cancelOrResetInput();
     }
 
-    public function edit($id)
-    {
-        $user = User::findOrFail($id);
-
-        $this->name = $user->name;
-        $this->email = $user->email;
-        $this->password = '';
-        $this->isEdit = true;
-        $this->showForm = true;
-        $this->showTable = false;
-
-        $this->editId = Crypt::encrypt($id); // Enkrip ID untuk URL
-    }
-
-    public function update()
-    {
-        $decryptedId = Crypt::decrypt($this->editId); // Dekrip dulu
-
-        $this->validate([
-            'name' => 'required|min:3',
-            'email' => 'required|email|unique:users,email,' . $decryptedId,
-            'password' => 'nullable|min:6',
-        ]);
-
-        $user = User::findOrFail($decryptedId);
-
-        $user->update([
-            'name' => $this->name,
-            'email' => $this->email,
-            'password' => $this->password ? Hash::make($this->password) : $user->password,
-        ]);
-
-        session()->flash('success', 'User berhasil diupdate');
-        $this->cancelOrResetInput();
-    }
-
     public function destroy($id)
     {
         User::findOrFail($id)->delete();
         session()->flash('success', 'User berhasil dihapus');
+    }
+
+    public function render()
+    {
+        $users = User::select('id', 'name', 'email')->paginate(10);
+        return view('livewire.user.user-index', [
+            'users' => $users,
+        ]);
     }
 }

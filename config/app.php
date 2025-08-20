@@ -123,4 +123,9 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'aliases' => [
+        // ...
+        'Hashids' => Vinkla\Hashids\Facades\Hashids::class,
+    ],
+
 ];
